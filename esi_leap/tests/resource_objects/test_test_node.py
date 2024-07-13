@@ -36,10 +36,10 @@ def get_test_lease():
     }
 
 
-class TestTestNode(base.TestCase):
+class TestFakeNode(base.TestCase):
     def setUp(self):
-        super(TestTestNode, self).setUp()
-        self.fake_test_node = test_node.TestNode("1111", "123456")
+        super(TestFakeNode, self).setUp()
+        self.fake_test_node = test_node.FakeNode("1111", "123456")
 
     def test_resource_type(self):
         resource_type = self.fake_test_node.resource_type

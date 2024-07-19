@@ -14,7 +14,6 @@ from esi_leap.common import rpc
 from esi_leap.tests import base
 
 import mock
-import pytest
 
 from oslo_config import cfg
 from oslo_context import context as ctx
@@ -25,30 +24,21 @@ CONF = cfg.CONF
 
 # TestUtils borrowed from Ironic
 class TestUtils(base.TestCase):
-    @mock.patch.object(messaging, "Notifier", autospec=True)
-    @mock.patch.object(messaging, "JsonPayloadSerializer", autospec=True)
-    @mock.patch.object(messaging, "get_notification_transport", autospec=True)
-    def test_init_globals_notifications_disabled(
-        self, mock_get_notification, mock_json_serializer, mock_notifier
-    ):
-        self._test_init_globals(
-            False, mock_get_notification, mock_json_serializer, mock_notifier
-        )
+    def test_init_globals_notifications_disabled(self):
+        self._test_init_globals(False)
 
-    @mock.patch.object(messaging, "Notifier", autospec=True)
-    @mock.patch.object(messaging, "JsonPayloadSerializer", autospec=True)
-    @mock.patch.object(messaging, "get_notification_transport", autospec=True)
-    def test_init_globals_notifications_enabled(
-        self, mock_get_notification, mock_json_serializer, mock_notifier
-    ):
+    def test_init_globals_notifications_enabled(self):
         self.config(notification_level="debug", group="notification")
-        self._test_init_globals(
-            True, mock_get_notification, mock_json_serializer, mock_notifier
-        )
+        self._test_init_globals(True)
 
+    @mock.patch.object(messaging, "Notifier", autospec=True)
+    @mock.patch.object(messaging, "JsonPayloadSerializer", autospec=True)
+    @mock.patch.object(messaging, "get_notification_transport", autospec=True)
+    @mock.patch.object(rpc, "RequestContextSerializer", autospec=True)
     def _test_init_globals(
         self,
         notifications_enabled,
+        mock_request_serializer,
         mock_get_notification,
         mock_json_serializer,
         mock_notifier,
@@ -56,10 +46,7 @@ class TestUtils(base.TestCase):
     ):
         rpc.NOTIFICATION_TRANSPORT = None
         rpc.VERSIONED_NOTIFIER = None
-        mock_request_serializer = mock.Mock()
         mock_request_serializer.return_value = mock.Mock()
-        rpc.RequestContextSerializer = mock_request_serializer
-
         mock_notifier.return_value = mock.Mock()
 
         rpc.init(CONF)
@@ -100,7 +87,6 @@ class TestUtils(base.TestCase):
         )
 
 
-@pytest.mark.xfail(reason="Bad mocking for rpc.RequestContextSerializer")
 class TestRequestContextSerializer(base.TestCase):
     def setUp(self):
         super(TestRequestContextSerializer, self).setUp()
